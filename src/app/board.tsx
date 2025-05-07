@@ -16,7 +16,7 @@ const Board = ({ title, elements }: BoardListProps) => {
     group: "cardList",
     multiDrag: true,
     dragHandle: ".kanban-handle",
-    selectedClass: "rounded-lg p-0.5 rotate-1",
+    selectedClass: "rounded-lg",
     draggable: (el) => {
       return el.id !== "no-drag";
     },
@@ -30,8 +30,20 @@ const Board = ({ title, elements }: BoardListProps) => {
   };
 
   const addCard = (name: string) => {
-    const newCard = { id: uuidv4(), name };
+    const newCard = { id: uuidv4(), name, isChecked: false };
     setCards([...cards, newCard]);
+  };
+
+  const toggleCardChecked = (id: string) => {
+    const newCards = cards.map((c) =>
+      c.id === id ? { ...c, isChecked: !c.isChecked } : c
+    );
+    setCards(newCards);
+  };
+
+  const updateCardName = (id: string, name: string) => {
+    const newCards = cards.map((c) => (c.id === id ? { ...c, name } : c));
+    setCards(newCards);
   };
 
   return (
@@ -42,20 +54,38 @@ const Board = ({ title, elements }: BoardListProps) => {
         </h2>
         <ul ref={cardList}>
           {cards.map((card) => (
-            <li className="cassette" data-label={card} key={card.id}>
-              <div className="kanban-handle flex items-center w-full max-w-xs p-3.5 text-gray-300 bg-gray-700 my-2 rounded-xl hover:border-2 hover:border-gray-500">
+            <li data-label={card} key={card.id}>
+              <div className="kanban-handle flex items-center w-full max-w-xs p-3.5 text-gray-300 bg-gray-700 my-2 rounded-xl hover:border-2 hover:border-gray-500 focus-within:border-2 focus-within:border-gray-500">
                 <div className="flex">
                   <input
                     type="checkbox"
-                    value=""
-                    className="w-4 h-4 rounded-full bg-gray-700 border-gray-600 text-blue-600 focus:ring-blue-500 focus:ring-2"
+                    checked={card.isChecked}
+                    onChange={(e) => {
+                      toggleCardChecked(card.id);
+                    }}
+                    className="w-4 h-4rounded-full bg-gray-700 text-blue-600 "
                   />
                   <label htmlFor="default-checkbox" className=""></label>
                 </div>
 
-                <span className="ms-3 text-sm font-normal break-all">
-                  {card.name}
-                </span>
+                <textarea
+                  ref={(el) => {
+                    if (el) {
+                      el.style.height = "auto";
+                      el.style.height = `${el.scrollHeight}px`;
+                    }
+                  }}
+                  value={card.name}
+                  onChange={(e) => {
+                    updateCardName(card.id, e.target.value);
+                    const el = e.target;
+                    el.style.height = "auto"; // reset height
+                    el.style.height = `${el.scrollHeight}px`; // set to scrollHeight
+                  }}
+                  className="p-1 mr-3 ms-3 text-sm font-normal break-all overflow-hidden bg-transparent w-full resize-none"
+                  rows={1}
+                />
+
                 <button
                   type="button"
                   className="cursor-pointer  ms-auto -mx-1.5 -my-1.5 bg-white text-gray-400 hover:text-gray-900 rounded-lg focus:ring-2 focus:ring-gray-300 p-1.5 hover:bg-gray-100 inline-flex items-center justify-center h-8 w-8 dark:text-gray-500 dark:hover:text-white dark:bg-gray-700 dark:hover:bg-gray-700"
@@ -97,11 +127,17 @@ const Board = ({ title, elements }: BoardListProps) => {
                 <div className="flex-col w-full hidden peer-checked:flex">
                   <form>
                     <textarea
-                      className="border-gray-700 border-2 w-full bg-transparent text-gray-300 focus:outline-none resize-y overflow-hidden px-5 pt-1 rounded-lg"
-                      placeholder="Escribe el título de la tarjeta..."
+                      className="p-5 resize-none border-gray-700 border-2 w-full bg-transparent text-gray-300 focus:outline-none overflow-hidden px-5 pt-1 rounded-lg min-h-16"
                       rows={2}
-                      value={newName}
+                      value={newName || ""}
+                      placeholder="Escribe el título de la tarjeta..."
                       onChange={(e) => setNewName(e.target.value)}
+                      ref={(el) => {
+                        if (el) {
+                          el.style.height = "auto";
+                          el.style.height = `${el.scrollHeight}px`;
+                        }
+                      }}
                     />
                     <div className="flex justify-end w-full">
                       <label
