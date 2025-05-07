@@ -1,103 +1,67 @@
-import Image from "next/image";
+"use client";
+import { BoardItem } from "@/types/boardItem";
+import { BoardData } from "@/types/boardData";
+import { useState } from "react";
+import { v4 as uuidv4 } from "uuid";
+import Board from "./board";
+import BoardForm from "./boardForm";
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const elements1: BoardItem[] = [
+    { id: uuidv4(), name: "Depeche" },
+    { id: uuidv4(), name: "Duran" },
+    { id: uuidv4(), name: "Pet" },
+    { id: uuidv4(), name: "Kraftwerk" },
+  ];
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  const elements2: BoardItem[] = [
+    { id: uuidv4(), name: "hola" },
+    { id: uuidv4(), name: "mina" },
+    { id: uuidv4(), name: "xd" },
+    { id: uuidv4(), name: "4" },
+  ];
+
+  const elements3: BoardItem[] = [
+    { id: uuidv4(), name: "asdf" },
+    { id: uuidv4(), name: "sdfgsdfg" },
+    { id: uuidv4(), name: "xsdfgsdfgd" },
+    { id: uuidv4(), name: "sdfgssdgfsfg" },
+  ];
+
+  const [boards, setBoards] = useState<BoardData[]>([
+    { id: uuidv4(), title: "Pendientes", elements: elements1 },
+    { id: uuidv4(), title: "Hecho", elements: elements2 },
+    { id: uuidv4(), title: "En progreso", elements: elements3 },
+  ]);
+
+  const [wallTitle, setWallTitle] = useState("Mi Pared de Tableros");
+
+  return (
+    <div className="h-screen w-full flex flex-col bg-gradient-to-br from-gray-900 to-gray-950 text-white">
+      {/* Header */}
+      <div className="w-full p-6 bg-black shadow-lg z-10">
+        <input
+          className="text-4xl font-bold bg-transparent text-white outline-none border-b-2 border-transparent focus:border-blue-500 transition-all duration-300 w-full max-w-xl mx-auto pl-6"
+          value={wallTitle}
+          onChange={(e) => setWallTitle(e.target.value)}
+        />
+      </div>
+
+      {/* Tableros */}
+      <div className="flex-1 overflow-x-auto p-6">
+        <div className="flex gap-6 min-w-max h-full">
+          {boards.map((board) => (
+            <div key={board.id} className="flex-shrink-0">
+              <Board title={board.title} elements={board.elements} />
+            </div>
+          ))}
+
+          {/* Agregar nueva columna */}
+          <div className="flex-shrink-0">
+            <BoardForm setBoards={setBoards} boards={boards} />
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      </div>
     </div>
   );
 }
