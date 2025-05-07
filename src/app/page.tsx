@@ -8,30 +8,30 @@ import BoardForm from "./boardForm";
 
 export default function Home() {
   const elements1: BoardItem[] = [
-    { id: uuidv4(), name: "Depeche" },
-    { id: uuidv4(), name: "Duran" },
-    { id: uuidv4(), name: "Pet" },
-    { id: uuidv4(), name: "Kraftwerk" },
+    { id: uuidv4(), name: "Estudiar", isChecked: false },
+    { id: uuidv4(), name: "Trabajar", isChecked: false },
+    { id: uuidv4(), name: "Hacer ejercicio", isChecked: true },
+    { id: uuidv4(), name: "Comprar comida", isChecked: true },
   ];
 
   const elements2: BoardItem[] = [
-    { id: uuidv4(), name: "hola" },
-    { id: uuidv4(), name: "mina" },
-    { id: uuidv4(), name: "xd" },
-    { id: uuidv4(), name: "4" },
+    { id: uuidv4(), name: "Hacer prueba tecnica", isChecked: false },
+    { id: uuidv4(), name: "Producir", isChecked: false },
+    { id: uuidv4(), name: "Bailar zamba", isChecked: true },
+    { id: uuidv4(), name: "Jugar videojuegos", isChecked: false },
   ];
 
   const elements3: BoardItem[] = [
-    { id: uuidv4(), name: "asdf" },
-    { id: uuidv4(), name: "sdfgsdfg" },
-    { id: uuidv4(), name: "xsdfgsdfgd" },
-    { id: uuidv4(), name: "sdfgssdgfsfg" },
+    { id: uuidv4(), name: "Salir al parque", isChecked: true },
+    { id: uuidv4(), name: "Ver pelicula", isChecked: true },
+    { id: uuidv4(), name: "Andar a caballo", isChecked: true },
+    { id: uuidv4(), name: "Maradona", isChecked: true },
   ];
 
   const [boards, setBoards] = useState<BoardData[]>([
-    { id: uuidv4(), title: "Pendientes", elements: elements1 },
-    { id: uuidv4(), title: "Hecho", elements: elements2 },
-    { id: uuidv4(), title: "En progreso", elements: elements3 },
+    { id: uuidv4(), title: "To Do", elements: elements1 },
+    { id: uuidv4(), title: "En progreso", elements: elements2 },
+    { id: uuidv4(), title: "Hecho", elements: elements3 },
   ]);
 
   const [wallTitle, setWallTitle] = useState("Mi Pared de Tableros");
