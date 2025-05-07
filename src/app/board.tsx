@@ -60,7 +60,7 @@ const Board = ({ title, elements }: BoardListProps) => {
                   <input
                     type="checkbox"
                     checked={card.isChecked}
-                    onChange={(e) => {
+                    onChange={() => {
                       toggleCardChecked(card.id);
                     }}
                     className="w-4 h-4rounded-full bg-gray-700 text-blue-600 "
