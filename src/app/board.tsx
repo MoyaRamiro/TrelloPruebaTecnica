@@ -1,14 +1,17 @@
+import { BoardData } from "@/types/boardData";
 import { BoardItem } from "@/types/boardItem";
 import { useDragAndDrop } from "@formkit/drag-and-drop/react";
 import { useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 
 interface BoardListProps {
+  id: string;
   title: string;
   elements: BoardItem[];
+  removeBoard: (id: string) => void;
 }
 
-const Board = ({ title, elements }: BoardListProps) => {
+const Board = ({ id, title, elements, removeBoard }: BoardListProps) => {
   const [cardList, cards, setCards] = useDragAndDrop<
     HTMLUListElement,
     BoardItem
@@ -51,13 +54,33 @@ const Board = ({ title, elements }: BoardListProps) => {
   return (
     <div className="my-5 mx-1 p-5 w-96">
       <div className=" bg-gray-800 rounded-xl p-5 ">
-        <h2 className="break-all opacity-90 text-2xl font-bold pb-3">
-          <input
-            className="text-3xl bg-transparent text-white/90 outline-none border-b-2 border-transparent focus:border-blue-500 transition-all duration-300 w-full max-w-xl mx-auto pl-2"
-            value={boardTitle}
-            onChange={(e) => setBoardTitle(e.target.value)}
-          />
-        </h2>
+        <div className="flex justify-between">
+          <h2 className="break-all opacity-90 text-2xl font-bold pb-3">
+            <textarea
+              ref={(el) => {
+                if (el) {
+                  el.style.height = "auto";
+                  el.style.height = `${el.scrollHeight}px`;
+                }
+              }}
+              className="break-all overflow-hidden resize-none text-3xl bg-transparent text-white/90 outline-none border-b-2 border-transparent focus:border-blue-500 transition-all duration-300 w-full max-w-xl mx-auto pl-2"
+              value={boardTitle}
+              onChange={(e) => setBoardTitle(e.target.value)}
+              rows={1}
+            />
+          </h2>
+          <button
+            className="text-red px-3 py-2 rounded-md cursor-pointer"
+            onClick={() => {
+              removeBoard(id);
+            }}
+          >
+            <svg className="w-3 h-3 hover:text-black">
+              <use href="icons.svg#cross" />
+            </svg>
+          </button>
+        </div>
+
         <ul ref={cardList}>
           {cards.map((card) => (
             <li data-label={card} key={card.id}>
@@ -84,9 +107,6 @@ const Board = ({ title, elements }: BoardListProps) => {
                   value={card.name}
                   onChange={(e) => {
                     updateCardName(card.id, e.target.value);
-                    const el = e.target;
-                    el.style.height = "auto"; // reset height
-                    el.style.height = `${el.scrollHeight}px`; // set to scrollHeight
                   }}
                   className="p-1 mr-3 ms-3 text-sm font-normal break-all overflow-hidden bg-transparent w-full resize-none"
                   rows={1}

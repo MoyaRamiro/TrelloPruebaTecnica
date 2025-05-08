@@ -55,9 +55,13 @@ export default function Home() {
     console.log(boardData);
   }, [boardData]);
 
+  const removeBoard = (id: string) => {
+    const newBoards = boardData.filter((board) => board.id !== id);
+    setBoardData(newBoards);
+  };
+
   return (
     <div className="h-screen w-full flex flex-col bg-gradient-to-br from-gray-900 to-gray-950 text-white">
-      {/* Header */}
       <div className="w-full p-6 bg-black shadow-lg z-10">
         <input
           className="text-4xl font-bold bg-transparent text-white outline-none border-b-2 border-transparent focus:border-blue-500 transition-all duration-300 w-full max-w-xl mx-auto pl-6"
@@ -66,14 +70,18 @@ export default function Home() {
         />
       </div>
 
-      {/* Tableros */}
       <div className="flex-1 overflow-x-auto p-6">
         <div className="flex gap-6 min-w-max h-full">
           <ul ref={boardList} className="flex flex-row list-none">
             {boardData.map((board) => (
               <li key={board.id} className="flex-shrink-0" data-label={board}>
                 <div className="kanban-handle">
-                  <Board title={board.title} elements={board.elements} />
+                  <Board
+                    id={board.id}
+                    title={board.title}
+                    elements={board.elements}
+                    removeBoard={removeBoard}
+                  />
                 </div>
               </li>
             ))}
