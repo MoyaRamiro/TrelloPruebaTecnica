@@ -46,11 +46,17 @@ const Board = ({ title, elements }: BoardListProps) => {
     setCards(newCards);
   };
 
+  const [boardTitle, setBoardTitle] = useState(title);
+
   return (
     <div className="my-5 mx-1 p-5 w-96">
       <div className=" bg-gray-800 rounded-xl p-5 ">
         <h2 className="break-all opacity-90 text-2xl font-bold pb-3">
-          {title}
+          <input
+            className="text-3xl bg-transparent text-white/90 outline-none border-b-2 border-transparent focus:border-blue-500 transition-all duration-300 w-full max-w-xl mx-auto pl-2"
+            value={boardTitle}
+            onChange={(e) => setBoardTitle(e.target.value)}
+          />
         </h2>
         <ul ref={cardList}>
           {cards.map((card) => (
