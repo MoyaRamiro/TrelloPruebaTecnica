@@ -1,40 +1,59 @@
 "use client";
-import { BoardItem } from "@/types/boardItem";
 import { BoardData } from "@/types/boardData";
-import { useState } from "react";
-import { v4 as uuidv4 } from "uuid";
+import { useEffect, useRef, useState } from "react";
 import Board from "./board";
 import BoardForm from "./boardForm";
+import { io, Socket } from "socket.io-client";
+import { useDragAndDrop } from "@formkit/drag-and-drop/react";
 
 export default function Home() {
-  const elements1: BoardItem[] = [
-    { id: uuidv4(), name: "Estudiar", isChecked: false },
-    { id: uuidv4(), name: "Trabajar", isChecked: false },
-    { id: uuidv4(), name: "Hacer ejercicio", isChecked: true },
-    { id: uuidv4(), name: "Comprar comida", isChecked: true },
-  ];
-
-  const elements2: BoardItem[] = [
-    { id: uuidv4(), name: "Hacer prueba tecnica", isChecked: false },
-    { id: uuidv4(), name: "Producir", isChecked: false },
-    { id: uuidv4(), name: "Bailar zamba", isChecked: true },
-    { id: uuidv4(), name: "Jugar videojuegos", isChecked: false },
-  ];
-
-  const elements3: BoardItem[] = [
-    { id: uuidv4(), name: "Salir al parque", isChecked: true },
-    { id: uuidv4(), name: "Ver pelicula", isChecked: true },
-    { id: uuidv4(), name: "Andar a caballo", isChecked: true },
-    { id: uuidv4(), name: "Maradona", isChecked: true },
-  ];
-
-  const [boards, setBoards] = useState<BoardData[]>([
-    { id: uuidv4(), title: "To Do", elements: elements1 },
-    { id: uuidv4(), title: "En progreso", elements: elements2 },
-    { id: uuidv4(), title: "Hecho", elements: elements3 },
-  ]);
-
+  const socketRef = useRef<Socket | null>(null);
   const [wallTitle, setWallTitle] = useState("Mi Pared de Tableros");
+
+  const [boardList, boardData, setBoardData] = useDragAndDrop<
+    HTMLUListElement,
+    BoardData
+  >([], {
+    group: "boardList",
+    dragHandle: ".kanban-handle",
+    selectedClass: "rounded-lg",
+  });
+
+  useEffect(() => {
+    if (!socketRef.current) {
+      socketRef.current = io("http://localhost:3000", {
+        reconnection: true,
+        reconnectionAttempts: 5,
+        reconnectionDelay: 1000,
+      });
+
+      socketRef.current.on("connect", () => {
+        console.log("✅ Conectado al servidor");
+      });
+
+      socketRef.current.on("initialBoardData", (data: BoardData[]) => {
+        console.log("📨 Datos iniciales recibidos:", data);
+        setBoardData(data);
+      });
+
+      socketRef.current.on("boardUpdate", (data: BoardData[]) => {
+        console.log("📨 Actualización recibida:", data);
+        setBoardData(data);
+      });
+    }
+
+    return () => {
+      if (socketRef.current) {
+        console.log("🔌 Desconectando socket...");
+        socketRef.current.disconnect();
+        socketRef.current = null;
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    console.log(boardData);
+  }, [boardData]);
 
   return (
     <div className="h-screen w-full flex flex-col bg-gradient-to-br from-gray-900 to-gray-950 text-white">
@@ -50,15 +69,17 @@ export default function Home() {
       {/* Tableros */}
       <div className="flex-1 overflow-x-auto p-6">
         <div className="flex gap-6 min-w-max h-full">
-          {boards.map((board) => (
-            <div key={board.id} className="flex-shrink-0">
-              <Board title={board.title} elements={board.elements} />
-            </div>
-          ))}
-
-          {/* Agregar nueva columna */}
+          <ul ref={boardList} className="flex flex-row list-none">
+            {boardData.map((board) => (
+              <li key={board.id} className="flex-shrink-0" data-label={board}>
+                <div className="kanban-handle">
+                  <Board title={board.title} elements={board.elements} />
+                </div>
+              </li>
+            ))}
+          </ul>
           <div className="flex-shrink-0">
-            <BoardForm setBoards={setBoards} boards={boards} />
+            <BoardForm setBoards={setBoardData} boards={boardData} />
           </div>
         </div>
       </div>
