@@ -38,7 +38,12 @@ export default function Home() {
 
       socketRef.current.on("boardUpdate", (data: BoardData[]) => {
         console.log("📨 Actualización recibida:", data);
-        setBoardData(data);
+        const transformedData = data.map((board) => ({
+          id: board.id,
+          title: board.title,
+          elements: board.elements,
+        }));
+        setBoardData(transformedData);
       });
     }
 
@@ -53,6 +58,17 @@ export default function Home() {
 
   useEffect(() => {
     console.log(boardData);
+  }, [boardData]);
+
+  useEffect(() => {
+    if (socketRef.current) {
+      const dataToSend = boardData.map((board) => ({
+        id: board.id,
+        title: board.title,
+        elements: board.elements,
+      }));
+      socketRef.current.emit("boardUpdate", { boardData: dataToSend });
+    }
   }, [boardData]);
 
   const removeBoard = (id: string) => {
@@ -74,7 +90,7 @@ export default function Home() {
         <div className="flex gap-6 min-w-max h-full">
           <ul ref={boardList} className="flex flex-row list-none">
             {boardData.map((board) => (
-              <li key={board.id} className="flex-shrink-0" data-label={board}>
+              <li key={board.id} className="flex-shrink-0">
                 <div className="kanban-handle">
                   <Board
                     id={board.id}
