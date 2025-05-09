@@ -5,9 +5,11 @@ import { v4 as uuidv4 } from "uuid";
 const BoardForm = ({
   boards,
   setBoards,
+  updateSocket,
 }: {
   boards: BoardData[];
   setBoards: (boards: BoardData[]) => void;
+  updateSocket: (boards: BoardData[]) => void;
 }) => {
   const [title, setTitle] = useState("");
 
@@ -21,6 +23,7 @@ const BoardForm = ({
     };
 
     setBoards([...boards, newBoard]);
+    updateSocket([...boards, newBoard]);
     setTitle("");
   };
   return (
@@ -29,7 +32,6 @@ const BoardForm = ({
         <div className="flex my-10 mx-1 px-5 py-2.5 h-fit w-96 bg-gray-800 rounded-xl hover:bg-gray-700 cursor-pointer">
           <input type="checkbox" id="add-board" className="hidden peer" />
 
-          {/* Before add board */}
           <div className="flex w-full peer-checked:hidden">
             <svg className="w-6 h-6 mx-3 items-center">
               <use href="icons.svg#add" />
@@ -37,7 +39,6 @@ const BoardForm = ({
             Añade otra lista...
           </div>
 
-          {/* Add board */}
           <form className="w-full hidden peer-checked:flex">
             <input
               className="border-gray-700 border-2 w-full bg-transparent text-gray-300 focus:outline-none resize-y overflow-hidden px-5 pt-1 rounded-lg"
@@ -52,7 +53,6 @@ const BoardForm = ({
                 onClick={() => {
                   handleAddBoard();
                 }}
-                /*falta el submit */
               >
                 <span>Añadir</span>
               </label>
