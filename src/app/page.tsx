@@ -1,112 +1,68 @@
 "use client";
-import { BoardData } from "@/types/boardData";
 import { useEffect, useRef, useState } from "react";
-import Board from "./board";
-import BoardForm from "./boardForm";
 import { io, Socket } from "socket.io-client";
-import { useDragAndDrop } from "@formkit/drag-and-drop/react";
+import { BoardData } from "@/types/boardData";
+import BoardList from "./boardList";
 
 export default function Home() {
   const socketRef = useRef<Socket | null>(null);
-  const [wallTitle, setWallTitle] = useState("Mi Pared de Tableros");
-
-  const [boardList, boardData, setBoardData] = useDragAndDrop<
-    HTMLUListElement,
-    BoardData
-  >([], {
-    group: "boardList",
-    dragHandle: ".kanban-handle",
-    selectedClass: "rounded-lg",
-  });
+  const [boardData, setBoardData] = useState<BoardData[]>([]);
+  const [isUpdated, setIsUpdated] = useState(false);
 
   useEffect(() => {
     if (!socketRef.current) {
-      socketRef.current = io("http://localhost:3000", {
-        reconnection: true,
-        reconnectionAttempts: 5,
-        reconnectionDelay: 1000,
-      });
+      socketRef.current = io("http://localhost:3001");
 
       socketRef.current.on("connect", () => {
         console.log("✅ Conectado al servidor");
       });
 
       socketRef.current.on("initialBoardData", (data: BoardData[]) => {
-        console.log("📨 Datos iniciales recibidos:", data);
         setBoardData(data);
       });
 
-      socketRef.current.on("boardUpdate", (data: BoardData[]) => {
-        console.log("📨 Actualización recibida:", data);
-        const transformedData = data.map((board) => ({
-          id: board.id,
-          title: board.title,
-          elements: board.elements,
-        }));
-        setBoardData(transformedData);
+      socketRef.current.on("update", (data: BoardData[]) => {
+        setBoardData(data);
+        setIsUpdated(true);
       });
     }
 
     return () => {
-      if (socketRef.current) {
-        console.log("🔌 Desconectando socket...");
-        socketRef.current.disconnect();
-        socketRef.current = null;
-      }
+      socketRef.current?.disconnect();
+      socketRef.current = null;
     };
   }, []);
 
-  useEffect(() => {
-    console.log(boardData);
-  }, [boardData]);
-
-  useEffect(() => {
-    if (socketRef.current) {
-      const dataToSend = boardData.map((board) => ({
-        id: board.id,
-        title: board.title,
-        elements: board.elements,
-      }));
-      socketRef.current.emit("boardUpdate", { boardData: dataToSend });
-    }
-  }, [boardData]);
-
-  const removeBoard = (id: string) => {
-    const newBoards = boardData.filter((board) => board.id !== id);
-    setBoardData(newBoards);
+  const updateBoardsSocket = (data: BoardData[]) => {
+    socketRef.current?.emit("boardUpdate", { boardData: data });
   };
 
   return (
     <div className="h-screen w-full flex flex-col bg-gradient-to-br from-gray-900 to-gray-950 text-white">
       <div className="w-full p-6 bg-black shadow-lg z-10">
-        <input
-          className="text-4xl font-bold bg-transparent text-white outline-none border-b-2 border-transparent focus:border-blue-500 transition-all duration-300 w-full max-w-xl mx-auto pl-6"
-          value={wallTitle}
-          onChange={(e) => setWallTitle(e.target.value)}
-        />
-      </div>
-
-      <div className="flex-1 overflow-x-auto p-6">
-        <div className="flex gap-6 min-w-max h-full">
-          <ul ref={boardList} className="flex flex-row list-none">
-            {boardData.map((board) => (
-              <li key={board.id} className="flex-shrink-0">
-                <div className="kanban-handle">
-                  <Board
-                    id={board.id}
-                    title={board.title}
-                    elements={board.elements}
-                    removeBoard={removeBoard}
-                  />
-                </div>
-              </li>
-            ))}
-          </ul>
-          <div className="flex-shrink-0">
-            <BoardForm setBoards={setBoardData} boards={boardData} />
+        {isUpdated && (
+          <div className="text-green-500 text-sm">
+            {/* Boton implementado para las cards. Los boards no lo necesitan*/}
+            <button
+              onClick={() => {
+                setIsUpdated(false);
+                window.location.reload();
+              }}
+              className="flex items-center text-green-500 text-sm"
+            >
+              Datos actualizados...
+              <span className="ml-5 p-5 bg-green-900 rounded-lg hover:bg-green-800 cursor-pointer">
+                Refrescar pagina
+              </span>
+            </button>
           </div>
-        </div>
+        )}
       </div>
+      <BoardList
+        updateBoardsSocket={updateBoardsSocket}
+        setBoardData={setBoardData}
+        boardData={boardData}
+      />
     </div>
   );
 }
